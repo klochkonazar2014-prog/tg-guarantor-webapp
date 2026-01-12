@@ -108,18 +108,14 @@
         function runFinalCheck() {
             const btn = document.getElementById('finalCheckBtn');
             btn.disabled = true;
-            btn.innerText = 'Проверяем...';
+            btn.innerText = 'Завершение...';
 
-            // Показываем нативное предупреждение, чтобы закрытие не было сюрпризом
             tg.showPopup({
-                title: 'Проверка запущена',
-                message: 'Сейчас окно закроется, и бот пришлет результат проверки в чат. Готовы?',
-                buttons: [{ id: 'ok', type: 'default', text: 'Да, давай' }]
-            }, (btnId) => {
-                if (btnId === 'ok') {
-                    tg.sendData(JSON.stringify({ action: 'check_business_connection' }));
-                    setTimeout(() => { tg.close(); }, 100);
-                }
+                title: 'Настройка завершена',
+                message: 'Если вы добавили бота в настройках Telegram Business, он уже отправил вам уведомление. Закройте это окно и проверьте статус подключения в чате!',
+                buttons: [{ id: 'ok', type: 'default', text: 'Понятно' }]
+            }, () => {
+                tg.close();
             });
         }
 
