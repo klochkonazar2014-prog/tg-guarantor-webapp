@@ -93,9 +93,18 @@
                 currentStep++;
                 updateUI();
             } else {
-                // Финальная проверка
+                // Извещаем пользователя, что идет проверка
+                nextBtn.disabled = true;
+                nextBtn.innerText = 'Проверка...';
+
+                // В Telegram Web Apps sendData(data) ВСЕГДА закрывает приложение, 
+                // если оно было открыто через reply_markup кнопку.
                 tg.sendData(JSON.stringify({ action: 'check_business_connection' }));
-                tg.close();
+
+                // Даем 100мс перед закрытием, чтобы данные точно ушли
+                setTimeout(() => {
+                    tg.close();
+                }, 100);
             }
         });
 
