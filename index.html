@@ -110,11 +110,17 @@
             btn.disabled = true;
             btn.innerText = 'Проверяем...';
 
-            // Отправляем сигнал боту
-            tg.sendData(JSON.stringify({ action: 'check_business_connection' }));
-
-            // Окно закроется автоматически из-за sendData
-            setTimeout(() => { tg.close(); }, 150);
+            // Показываем нативное предупреждение, чтобы закрытие не было сюрпризом
+            tg.showPopup({
+                title: 'Проверка запущена',
+                message: 'Сейчас окно закроется, и бот пришлет результат проверки в чат. Готовы?',
+                buttons: [{ id: 'ok', type: 'default', text: 'Да, давай' }]
+            }, (btnId) => {
+                if (btnId === 'ok') {
+                    tg.sendData(JSON.stringify({ action: 'check_business_connection' }));
+                    setTimeout(() => { tg.close(); }, 100);
+                }
+            });
         }
 
         function copyBotName() {
