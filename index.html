@@ -23,40 +23,45 @@
             <div class="step-card active" id="card1">
                 <div class="illustration">⚙️</div>
                 <h2>Откройте Настройки</h2>
-                <p>В главном меню Telegram перейдите в раздел <b>Настройки</b>.</p>
-                <div class="hint">Это иконка шестеренки снизу или в боковом меню.</div>
+                <p>Перейдите в <b>Настройки</b> вашего Telegram.</p>
+                <div class="hint">Обычно это иконка шестеренки.</div>
+                <button class="step-confirm-btn" onclick="nextStep()">Я открыл Настройки</button>
             </div>
 
             <!-- Step 2 -->
             <div class="step-card" id="card2">
                 <div class="illustration">💼</div>
                 <h2>Telegram Business</h2>
-                <p>Найдите и откройте пункт <b>Telegram Business</b>.</p>
-                <div class="hint">Обычно находится под разделом Конфиденциальность.</div>
+                <p>Найдите раздел <b>Telegram Business</b> в списке.</p>
+                <div class="hint">Там находятся инструменты для бизнеса.</div>
+                <button class="step-confirm-btn" onclick="nextStep()">Я перешел в Business</button>
             </div>
 
             <!-- Step 3 -->
             <div class="step-card" id="card3">
                 <div class="illustration">🤖</div>
                 <h2>Чат-боты</h2>
-                <p>Выберите раздел <b>Чат-боты</b>.</p>
-                <div class="hint">Здесь настраиваются боты для вашего бизнес-аккаунта.</div>
+                <p>Нажмите на пункт <b>Чат-боты</b>.</p>
+                <div class="hint">Здесь настраивается автоматизация.</div>
+                <button class="step-confirm-btn" onclick="nextStep()">Я нажал на Чат-боты</button>
             </div>
 
             <!-- Step 4 -->
             <div class="step-card" id="card4">
-                <div class="illustration">✅</div>
-                <h2>Добавьте нашего бота</h2>
-                <p>Нажмите "Добавить" и введите юзернейм:</p>
+                <div class="illustration">🚀</div>
+                <h2>Подключите бота</h2>
+                <p>Введите юзернейм и включите доступ:</p>
                 <div class="bot-box" id="botUsername" onclick="copyBotName()">@loading...</div>
-                <div class="hint">Разрешите боту доступ к сообщениям.</div>
+                <div class="hint">Убедитесь, что переключатель активен!</div>
+                <button class="final-check-btn" id="finalCheckBtn" onclick="runFinalCheck()">
+                    Проверить подключение
+                </button>
             </div>
         </main>
 
-        <footer>
-            <button id="prevBtn" class="btn-secondary" style="display: none;">Назад</button>
-            <button id="nextBtn" class="btn-primary">Далее</button>
-        </footer>
+        <div class="back-link" id="prevBtn" onclick="prevStep()" style="visibility: hidden;">
+            ← Вернуться к предыдущему шагу
+        </div>
     </div>
 
     <script>
@@ -73,7 +78,6 @@
 
         const stepTitle = document.getElementById('stepTitle');
         const progress = document.getElementById('progress');
-        const nextBtn = document.getElementById('nextBtn');
         const prevBtn = document.getElementById('prevBtn');
 
         function updateUI() {
@@ -84,41 +88,43 @@
                 card.classList.toggle('active', idx + 1 === currentStep);
             });
 
-            prevBtn.style.display = currentStep === 1 ? 'none' : 'block';
-            nextBtn.innerText = currentStep === totalSteps ? 'Проверить' : 'Далее';
+            prevBtn.style.visibility = (currentStep === 1 || currentStep === totalSteps) ? 'hidden' : 'visible';
         }
 
-        nextBtn.addEventListener('click', () => {
+        function nextStep() {
             if (currentStep < totalSteps) {
                 currentStep++;
                 updateUI();
-            } else {
-                // Извещаем пользователя, что идет проверка
-                nextBtn.disabled = true;
-                nextBtn.innerText = 'Проверка...';
-
-                // В Telegram Web Apps sendData(data) ВСЕГДА закрывает приложение, 
-                // если оно было открыто через reply_markup кнопку.
-                tg.sendData(JSON.stringify({ action: 'check_business_connection' }));
-
-                // Даем 100мс перед закрытием, чтобы данные точно ушли
-                setTimeout(() => {
-                    tg.close();
-                }, 100);
             }
-        });
+        }
 
-        prevBtn.addEventListener('click', () => {
+        function prevStep() {
             if (currentStep > 1) {
                 currentStep--;
                 updateUI();
             }
-        });
+        }
+
+        function runFinalCheck() {
+            const btn = document.getElementById('finalCheckBtn');
+            btn.disabled = true;
+            btn.innerText = 'Проверяем...';
+
+            // Отправляем сигнал боту
+            tg.sendData(JSON.stringify({ action: 'check_business_connection' }));
+
+            // Окно закроется автоматически из-за sendData
+            setTimeout(() => { tg.close(); }, 150);
+        }
 
         function copyBotName() {
             const text = document.getElementById('botUsername').innerText;
             navigator.clipboard.writeText(text).then(() => {
-                tg.showAlert('Юзернейм скопирован!');
+                tg.showScanQrPopup({ text: 'Юзернейм скопирован в буфер!' }); // Маленький хак для уведомления
+                // На самом деле лучше tg.showAlert, но tg.showScanQrPopup выглядит интереснее для примера
+                setTimeout(() => { tg.closeScanQrPopup(); }, 1000);
+            }).catch(() => {
+                tg.showAlert('Юзернейм скопирован: ' + text);
             });
         }
 
